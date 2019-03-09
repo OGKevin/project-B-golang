@@ -1,0 +1,82 @@
+basePath: /api/v1
+definitions:
+  responses.Ack:
+    properties:
+      ack:
+        type: boolean
+    type: object
+  responses.BadRequest:
+    properties:
+      ack:
+        $ref: '#/definitions/responses.Ack'
+        type: object
+      error:
+        $ref: '#/definitions/responses.Error'
+        type: object
+    type: object
+  responses.Created:
+    properties:
+      ack:
+        $ref: '#/definitions/responses.Ack'
+        type: object
+      id:
+        type: string
+    type: object
+  responses.Error:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  user.createUserRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: project-b.ogkevin.nl
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Well you know, nothing important. Just making sure people can capture
+    memories
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Project b
+  version: "1.0"
+paths:
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: get string by ID
+      operationId: get-string-by-int
+      parameters:
+      - description: test
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.createUserRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Created'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.BadRequest'
+            type: object
+      summary: Show a account
+swagger: "2.0"

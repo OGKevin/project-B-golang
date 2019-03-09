@@ -2,10 +2,8 @@
 
 PROJECT_NAME=project-b-backend
 
-docker build --build-arg TAG=${TRAVIS_COMMIT} -t ${PROJECT_NAME} -f ./cmd/http/Dockerfile .
+echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
 
-docker tag ${PROJECT_NAME} ${PROJECT_NAME}:latest
-docker tag ${PROJECT_NAME}:latest ogkevin/${PROJECT_NAME}:latest
+docker build --build-arg TAG=${TRAVIS_COMMIT} -t ogkevin/${PROJECT_NAME}:${TRAVIS_COMMIT} -f ./cmd/http/Dockerfile .
 
-docker tag ${PROJECT_NAME} ${PROJECT_NAME}:${TRAVIS_COMMIT}
-docker tag ${PROJECT_NAME}:${TRAVIS_COMMIT} ogkevin/${PROJECT_NAME}:${TRAVIS_COMMIT}
+docker push ogkevin/${PROJECT_NAME}:${TRAVIS_COMMIT}

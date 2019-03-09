@@ -1,0 +1,50 @@
+version: '3'
+services: 
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:alpine
+    ports:
+    - 80:2015
+    command: -email dontcare@care.com -agree=true -log stdout
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+  http:
+    build:
+      context: ./
+      dockerfile: ./cmd/http/Dockerfile
+    environment:
+    - TAG=${TAG}
+    - ENV=${ENV}
+    - SENTRY_DSN=${SENTRY_DSN}
+    - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    - TELEGRAM_USER_CHAT_ID=${TELEGRAM_USER_CHAT_ID}
+    - DB_TYPE=${DB_TYPE}
+    - DB_PATH=${DB_USER}:${DB_PASS}@tcp(http_db:3306)/${DB_NAME}?parseTime=true
+    - LOG_LEVEL=${LOG_LEVEL}
+    restart: always
+    command: ["/http"]
+    labels:
+      caddy.address: project-b.ogkevin.net
+      caddy.targetport: "80"
+      caddy.tls: "off"
+  
+  http_db:
+    environment: 
+    - MYSQL_DATABASE=${DB_NAME}
+    - MYSQL_USER=${DB_USER}
+    - MYSQL_PASSWORD=${DB_PASS}
+    - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    image: "mariadb:latest"
+    volumes: 
+    - ./tmp/database/http:/var/lib/mysql
+    ports:
+    - 3301:3306
+
+  http_db_test:
+    environment:
+      - MYSQL_USER=http
+      - MYSQL_PASSWORD=http_pass
+      - MYSQL_ROOT_PASSWORD=pass
+    image: "mariadb:latest"
+    ports:
+      - 3303:3306
