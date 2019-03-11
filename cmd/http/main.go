@@ -75,7 +75,7 @@ func createRouter() *chi.Mux{
 		r.Get("/", index)
 		r.Route("/user", user.Router)
 	})
-	r.Get("/.well-known/acme-challenge/{token}", wellknown.ServeHTTP)
+	r.Route("/.well-known/", wellknown.Router)
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	return r
