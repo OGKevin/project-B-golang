@@ -9,6 +9,7 @@ docker build --build-arg TAG=${TRAVIS_COMMIT} -t ogkevin/${PROJECT_NAME}:${TRAVI
 docker push ogkevin/${PROJECT_NAME}:${TRAVIS_COMMIT}
 
 go run cmd/migrations/main.go up
+go run cmd/migrations/main.go status
 
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 chmod +x ./kubectl
