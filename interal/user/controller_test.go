@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/asaskevich/govalidator"
 	"github.com/francoispqt/gojay"
+	"github.com/go-chi/chi"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -80,7 +81,9 @@ func TestCreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			NewCreateUserRequest(tt.users).ServeHttp(tt.args.w, tt.args.r)
+			m := chi.NewMux()
+			m.Route("/", BuildRouter(tt.users))
+			m.ServeHTTP(tt.args.w, tt.args.r)
 
 			w := tt.args.w.(*httptest.ResponseRecorder)
 			if !assert.Equal(t, tt.code, w.Code) {

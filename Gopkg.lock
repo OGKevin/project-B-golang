@@ -53,12 +53,23 @@
   version = "1.2.8"
 
 [[projects]]
-  digest = "1:948d6ffd670aa33e90898f3800e869593bf9f9c7408650cf88a99e9afc682a86"
+  digest = "1:e314993806c7b43f0d7c0abaedde500aa4de3010407a62a282e30748bac8df0b"
   name = "github.com/go-chi/chi"
-  packages = ["."]
+  packages = [
+    ".",
+    "middleware",
+  ]
   pruneopts = "NUT"
   revision = "da24bba8dcd4021cafac38724bf10dccc97c3e36"
   version = "v4.0.2"
+
+[[projects]]
+  digest = "1:4d84bf04312da80591f93e0d18bfd93f30511ad78038d50aafd83acd3e650938"
+  name = "github.com/go-chi/docgen"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "c94a1e40c06f53a447a809bad19c5f3c4047acc5"
+  version = "v1.0.5"
 
 [[projects]]
   digest = "1:260f7ebefc63024c8dfe2c9f1a2935a89fa4213637a1f522f592f80c001cc441"
@@ -308,6 +319,8 @@
     "github.com/asaskevich/govalidator",
     "github.com/francoispqt/gojay",
     "github.com/go-chi/chi",
+    "github.com/go-chi/chi/middleware",
+    "github.com/go-chi/docgen",
     "github.com/go-sql-driver/mysql",
     "github.com/jmoiron/sqlx",
     "github.com/joho/godotenv",
