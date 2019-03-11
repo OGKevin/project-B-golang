@@ -1,12 +1,12 @@
 FROM golang:1.11 as builder
 
-WORKDIR /go/src/github.com/OGKevin/automation
-COPY . .
+WORKDIR /go/src/github.com/OGKevin/project-B-golang
 
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-RUN dep ensure
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /http github.com/OGKevin/automation/cmd/http
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /http github.com/OGKevin/project-B-golang/cmd/http
 
 FROM alpine
 
@@ -20,8 +20,11 @@ RUN apk update \
         ca-certificates \
         && update-ca-certificates 2>/dev/null || true
 
+RUN mkdir -p /go/src/github.com/OGKevin/project-B-golang
+COPY --from=builder /go/src/github.com/OGKevin/project-B-golang /go/src/github.com/OGKevin/project-B-golang
+
 WORKDIR /app
 
-COPY --from=builder /http /app/http
+COPY --from=builder /http /http
 
 CMD /bin/sh
