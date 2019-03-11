@@ -13,6 +13,7 @@ FROM alpine
 ARG TAG
 ENV TAG=${TAG}
 ENV SENTRY_RELEASE=${TAG}
+ENV GOPATH=/go
 
 RUN apk update \
         && apk upgrade \

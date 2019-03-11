@@ -2,17 +2,23 @@ package main
 
 import (
 	_ "github.com/OGKevin/project-B-golang/docs"
+	"github.com/OGKevin/project-B-golang/interal/database"
 	"github.com/OGKevin/project-B-golang/interal/logging"
 	"github.com/OGKevin/project-B-golang/interal/response"
 	"github.com/OGKevin/project-B-golang/interal/user"
 	"github.com/OGKevin/project-B-golang/interal/wellknown"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/docgen"
+	"github.com/go-chi/render"
+	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"github.com/swaggo/http-swagger"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -26,17 +32,20 @@ func init() {
 
 func setContentTypeHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.RequestURI, "/api") || strings.Contains(r.RequestURI, ".json"){
-			w.Header().Add("Content-Type", "application/json")
+		if strings.Contains(r.RequestURI, ".json"){
+			w.Header().Set("Content-Type", "application/json")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".html") {
-			w.Header().Add("Content-Type", "text/html")
+			w.Header().Set("Content-Type", "text/html")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".js") {
-			w.Header().Add("Content-Type", "text/javascript")
+			w.Header().Set("Content-Type", "text/javascript")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".css") {
-			w.Header().Add("Content-Type", "text/css")
+			w.Header().Set("Content-Type", "text/css")
+			next.ServeHTTP(w, r)
+		} else {
+			w.Header().Set("Content-Type", "text/text")
 			next.ServeHTTP(w, r)
 		}
 	})
@@ -46,7 +55,9 @@ func main() {
 	logging.Trace(logging.TraceTypeEntering)
 	defer logging.Trace(logging.TraceTypeExiting)
 
-	r := createRouter()
+	db := database.GetDB()
+
+	r := createRouter(db)
 
 	err := http.ListenAndServe(":80", r)
 	logrus.WithError(err).Fatal("http server died")
@@ -66,18 +77,32 @@ func main() {
 
 // @host project-b.ogkevin.nl
 // @BasePath /api/v1
-func createRouter() *chi.Mux{
+func createRouter(db *sqlx.DB) *chi.Mux{
 	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 	r.Use(setContentTypeHeader)
+	r.Use(middleware.Timeout(time.Second * 5))
 
 	r.Get("/", index)
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/", index)
-		r.Route("/user", user.Router)
-	})
-	r.Route("/.well-known/", wellknown.Router)
+	r.Mount("/api/v1", apiRouter(db))
+	r.Route("/.well-known", wellknown.Router)
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
+	docgen.PrintRoutes(r)
+
+	return r
+}
+
+func apiRouter(db *sqlx.DB) chi.Router {
+	r := chi.NewRouter()
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/swagger/doc.json", http.StatusPermanentRedirect)
+	})
+	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db)))
 	return r
 }
 

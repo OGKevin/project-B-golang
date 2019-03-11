@@ -80,7 +80,8 @@ func TestCreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			NewCreateUserRequest(tt.users).ServeHttp(tt.args.w, tt.args.r)
+			m := BuildRouter(tt.users)
+			m.ServeHTTP(tt.args.w, tt.args.r)
 
 			w := tt.args.w.(*httptest.ResponseRecorder)
 			if !assert.Equal(t, tt.code, w.Code) {
