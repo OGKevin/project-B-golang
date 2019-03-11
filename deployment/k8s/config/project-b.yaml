@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: project-b-backed-env
+data:
+  DB_TYPE: mysql
+  BASE_URL: https://project-b.ogkevin.nl
+  ENV: production
+  SENTRY_ENVIRONMENT: production
+  LOG_LEVEL: info
