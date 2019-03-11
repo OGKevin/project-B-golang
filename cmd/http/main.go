@@ -11,7 +11,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/docgen"
-	"github.com/go-chi/render"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -32,7 +31,7 @@ func init() {
 
 func setContentTypeHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.RequestURI, ".json"){
+		if strings.Contains(r.RequestURI, "/api") || strings.Contains(r.RequestURI, ".json") {
 			w.Header().Set("Content-Type", "application/json")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".html") {
@@ -98,7 +97,6 @@ func createRouter(db *sqlx.DB) *chi.Mux{
 
 func apiRouter(db *sqlx.DB) chi.Router {
 	r := chi.NewRouter()
-	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/swagger/doc.json", http.StatusPermanentRedirect)
 	})
