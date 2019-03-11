@@ -6,8 +6,6 @@ RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 COPY . .
 
-RUN dep ensure
-
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /http github.com/OGKevin/project-B-golang/cmd/http
 
 FROM alpine

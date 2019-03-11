@@ -19,7 +19,7 @@ func NewError(message string) *Error {
 }
 // NewErrorf Constructs a new error object
 func NewErrorf(message string, args ...interface{}) *Error {
-	return &Error{Message: fmt.Sprintf(message, args)}
+	return &Error{Message: fmt.Sprintf(message, args...)}
 }
 
 // NewValidationError Constructs a new error object and appends
