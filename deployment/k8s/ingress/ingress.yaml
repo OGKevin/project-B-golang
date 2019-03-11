@@ -11,3 +11,7 @@ spec:
             backend:
               serviceName: project-b-backend-http
               servicePort: 60000
+  tls:
+    - hosts:
+      - project-b.ogkevin.nl
+      secretName: project-b-ogkevin-nl-cert
