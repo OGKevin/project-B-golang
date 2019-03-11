@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: project-b
+spec:
+  rules:
+    - host: project-b.ogkevin.nl
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: project-b-backend-http
+              servicePort: 60000
