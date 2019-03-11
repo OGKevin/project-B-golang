@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	_ "github.com/OGKevin/project-B-golang/docs"
 	"github.com/OGKevin/project-B-golang/interal/database"
 	"github.com/OGKevin/project-B-golang/interal/logging"
@@ -12,6 +11,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/docgen"
+	"github.com/go-chi/render"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -32,20 +32,20 @@ func init() {
 
 func setContentTypeHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.RequestURI, "/api") || strings.Contains(r.RequestURI, ".json"){
-			w.Header().Add("Content-Type", "application/json")
+		if strings.Contains(r.RequestURI, ".json"){
+			w.Header().Set("Content-Type", "application/json")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".html") {
-			w.Header().Add("Content-Type", "text/html")
+			w.Header().Set("Content-Type", "text/html")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".js") {
-			w.Header().Add("Content-Type", "text/javascript")
+			w.Header().Set("Content-Type", "text/javascript")
 			next.ServeHTTP(w, r)
 		} else if strings.Contains(r.RequestURI, ".css") {
-			w.Header().Add("Content-Type", "text/css")
+			w.Header().Set("Content-Type", "text/css")
 			next.ServeHTTP(w, r)
 		} else {
-			w.Header().Add("Content-Type", "text/text")
+			w.Header().Set("Content-Type", "text/text")
 			next.ServeHTTP(w, r)
 		}
 	})
@@ -98,18 +98,11 @@ func createRouter(db *sqlx.DB) *chi.Mux{
 
 func apiRouter(db *sqlx.DB) chi.Router {
 	r := chi.NewRouter()
-	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db)))
-	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
-		doc, err := docgen.BuildDoc(r)
-		if err != nil {
-			logrus.WithError(err).Error("could not build api doc")
-		}
-
-		err = json.NewEncoder(w).Encode(doc)
-		if err != nil {
-			logrus.WithError(err).Error("could not write doc")
-		}
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/swagger/doc.json", http.StatusPermanentRedirect)
 	})
+	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db)))
 	return r
 }
 
