@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
@@ -27,7 +25,6 @@ func TestCreateUser(t *testing.T) {
 	type args struct {
 		w   http.ResponseWriter
 		r   *http.Request
-		in2 httprouter.Params
 	}
 	tests := []struct {
 		name string
@@ -83,7 +80,7 @@ func TestCreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			NewCreateUserRequest(tt.users).Handle(tt.args.w, tt.args.r, tt.args.in2)
+			NewCreateUserRequest(tt.users).ServeHttp(tt.args.w, tt.args.r)
 
 			w := tt.args.w.(*httptest.ResponseRecorder)
 			if !assert.Equal(t, tt.code, w.Code) {

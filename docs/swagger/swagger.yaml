@@ -55,8 +55,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: get string by ID
-      operationId: get-string-by-int
+      description: Register a new user
+      operationId: register-new-user
       parameters:
       - description: test
         in: body
@@ -78,5 +78,5 @@ paths:
           schema:
             $ref: '#/definitions/responses.BadRequest'
             type: object
-      summary: Show a account
+      summary: Register a new user
 swagger: "2.0"

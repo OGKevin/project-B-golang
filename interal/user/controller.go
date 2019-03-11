@@ -5,7 +5,6 @@ import (
 	"github.com/OGKevin/project-B-golang/interal/responses"
 	"github.com/asaskevich/govalidator"
 	"github.com/francoispqt/gojay"
-	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -15,7 +14,7 @@ type createUserRequest struct {
 	Username string `gojay:"username"valid:"length(5|255)"`
 	Password string `gojay:"password"valid:"length(10|255)"`
 
-	user Users `gojay:"-"`
+	user Users `gojay:"-"json:"-"`
 }
 
 func NewCreateUserRequest(user Users) *createUserRequest {
@@ -32,7 +31,7 @@ func NewCreateUserRequest(user Users) *createUserRequest {
 // @Success 200 {object} responses.Created
 // @Failure 400 {object} responses.BadRequest
 // @Router /user [post]
-func (b *createUserRequest) Handle(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (b *createUserRequest) ServeHttp(w http.ResponseWriter, r *http.Request) {
 	err := gojay.NewDecoder(r.Body).DecodeObject(b)
 	if err != nil {
 		logrus.WithError(err).Error("could not decode body")

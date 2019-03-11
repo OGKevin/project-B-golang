@@ -1,18 +1,17 @@
 package main
 
 import (
-	"github.com/OGKevin/project-B-golang/interal/database"
+	_ "github.com/OGKevin/project-B-golang/docs"
 	"github.com/OGKevin/project-B-golang/interal/logging"
 	"github.com/OGKevin/project-B-golang/interal/response"
 	"github.com/OGKevin/project-B-golang/interal/user"
+	"github.com/OGKevin/project-B-golang/interal/wellknown"
 	"github.com/asaskevich/govalidator"
-	"github.com/jmoiron/sqlx"
+	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
-	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
 	"github.com/swaggo/http-swagger"
 	"net/http"
-	_ "github.com/OGKevin/project-B-golang/docs"
 	"strings"
 )
 
@@ -25,27 +24,31 @@ func init() {
 	govalidator.SetFieldsRequiredByDefault(true)
 }
 
-type setContentTypeHeader struct {
-	handler http.Handler
-}
-
-func (s setContentTypeHeader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.Contains(r.RequestURI, "/api") || strings.Contains(r.RequestURI, ".json"){
-		w.Header().Add("Content-Type", "application/json")
-		s.handler.ServeHTTP(w, r)
-	} else if strings.Contains(r.RequestURI, ".html") {
-		w.Header().Add("Content-Type", "text/html")
-		s.handler.ServeHTTP(w, r)
-	}
+func setContentTypeHeader(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.RequestURI, "/api") || strings.Contains(r.RequestURI, ".json"){
+			w.Header().Add("Content-Type", "application/json")
+			next.ServeHTTP(w, r)
+		} else if strings.Contains(r.RequestURI, ".html") {
+			w.Header().Add("Content-Type", "text/html")
+			next.ServeHTTP(w, r)
+		} else if strings.Contains(r.RequestURI, ".js") {
+			w.Header().Add("Content-Type", "text/javascript")
+			next.ServeHTTP(w, r)
+		} else if strings.Contains(r.RequestURI, ".css") {
+			w.Header().Add("Content-Type", "text/css")
+			next.ServeHTTP(w, r)
+		}
+	})
 }
 
 func main() {
 	logging.Trace(logging.TraceTypeEntering)
 	defer logging.Trace(logging.TraceTypeExiting)
 
-	router := createRouter(database.GetDB())
+	r := createRouter()
 
-	err := http.ListenAndServe(":80", setContentTypeHeader{handler: router})
+	err := http.ListenAndServe(":80", r)
 	logrus.WithError(err).Fatal("http server died")
 }
 
@@ -63,21 +66,22 @@ func main() {
 
 // @host project-b.ogkevin.nl
 // @BasePath /api/v1
-func createRouter(db *sqlx.DB) *httprouter.Router {
-	router := httprouter.New()
-	router.GET("/", index)
-	router.GET("/api/v1", index)
-	router.POST("/api/v1/user", user.NewCreateUserRequest(user.NewUsersDatabase(db)).Handle)
-	router.GET("/swagger/*swagger", swagger)
+func createRouter() *chi.Mux{
+	r := chi.NewRouter()
+	r.Use(setContentTypeHeader)
 
-	return router
+	r.Get("/", index)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/", index)
+		r.Route("/user", user.Router)
+	})
+	r.Route("/.well-known/", wellknown.Router)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
+	return r
 }
 
-func swagger(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	httpSwagger.WrapHandler.ServeHTTP(w, r)
-}
-
-func index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func index(w http.ResponseWriter, _ *http.Request) {
 	err := response.WriteAckTrue(w)
 	if err != nil {
 		logrus.WithError(err).Error("could not send index")
