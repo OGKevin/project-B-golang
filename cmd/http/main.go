@@ -44,7 +44,7 @@ func setContentTypeHeader(next http.Handler) http.Handler {
 			w.Header().Set("Content-Type", "text/css")
 			next.ServeHTTP(w, r)
 		} else {
-			w.Header().Set("Content-Type", "text/text")
+			w.Header().Set("Content-Type", "application/json")
 			next.ServeHTTP(w, r)
 		}
 	})
