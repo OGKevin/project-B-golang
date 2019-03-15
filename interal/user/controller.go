@@ -27,7 +27,7 @@ func NewCreateUserRequest(user Users) *createUserRequest {
 // @ID register-new-user
 // @Accept  json
 // @Produce  json
-// @Param body body user.createUserRequest true "test"
+// @Param body body user.createUserRequest true "The expected request body. Username must be length(5|255) and Password length(10|255)."
 // @Success 200 {object} responses.Created
 // @Failure 400 {object} responses.BadRequest
 // @Router /user [post]
