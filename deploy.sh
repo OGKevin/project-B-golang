@@ -2,6 +2,10 @@
 
 PROJECT_NAME=project-b-backend
 
+if [[ ${TRAVIS_EVENT_TYPE} == "cron" ]]; then
+    exit 0
+fi
+
 echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
 
 docker build --build-arg TAG=${TRAVIS_COMMIT} -t ogkevin/${PROJECT_NAME}:${TRAVIS_COMMIT} -f ./cmd/http/Dockerfile .
