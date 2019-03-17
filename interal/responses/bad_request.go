@@ -9,7 +9,9 @@ import (
 )
 
 type Error struct {
+	// Message The message explaining the error.
 	Message string `gojay:"message"`
+	// Coode The http status code that belongs to this error.
 	Code int `gojay:"code"`
 }
 
@@ -29,7 +31,9 @@ func NewValidationError(message string) *Error {
 }
 
 type BadRequest struct {
+	// Ack Defines if the request was successful or not.
 	Ack   Ack    `gojay:"ack,object"`
+	// Error Explains why the server is responding with a bad request.
 	Error *Error `gojay:"error"`
 }
 
