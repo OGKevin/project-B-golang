@@ -45,6 +45,14 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:7a6852b35eb5bbc184561443762d225116ae630c26a7c4d90546619f1e7d2ad2"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:fa45c6acaca42106cac696f71173638a1cdd7e714617a35e96d42f6b66694050"
   name = "github.com/francoispqt/gojay"
   packages = ["."]
@@ -72,12 +80,12 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:6982473e328c7049bdc425618872e37609d4bc58dc4198f4dcbe7cf64ca7b7f0"
-  name = "github.com/go-chi/render"
+  digest = "1:3e74d56538fe7967f427a5a6b990c24f5a0332699233cd02c045dc29f65909cc"
+  name = "github.com/go-chi/jwtauth"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "3215478343fbc559bd3fc08f7031bb134d6bdad5"
-  version = "v1.0.1"
+  revision = "47840abb19b36dcf4d3ab4123b605b28ea511bc8"
+  version = "v4.0.2"
 
 [[projects]]
   digest = "1:260f7ebefc63024c8dfe2c9f1a2935a89fa4213637a1f522f592f80c001cc441"
@@ -329,7 +337,7 @@
     "github.com/go-chi/chi",
     "github.com/go-chi/chi/middleware",
     "github.com/go-chi/docgen",
-    "github.com/go-chi/render",
+    "github.com/go-chi/jwtauth",
     "github.com/go-sql-driver/mysql",
     "github.com/jmoiron/sqlx",
     "github.com/joho/godotenv",

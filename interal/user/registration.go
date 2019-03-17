@@ -1,4 +1,5 @@
 //go:generate gojay -s=$GOFILE -t=User -o=generated_$GOFILE
+//go:generate goimports -w  generated_$GOFILE
 package user
 
 import (
@@ -11,9 +12,9 @@ import (
 
 type User struct {
 	// the userId
-	ID uuid.UUID `json:"id"`
+	ID uuid.UUID `gojay:"id"`
 	// the username
-	Username string `json:"username"`
+	Username string `gojay:"username"`
 }
 
 // CreateNewUser creates a new user.

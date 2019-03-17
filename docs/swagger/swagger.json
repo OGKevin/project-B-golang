@@ -58,6 +58,63 @@
                     }
                 }
             }
+        },
+        "/user/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "gets user by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "gets user by id",
+                "operationId": "get-user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The id to get the user",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The BEARER token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "The error object will explain why the request failed.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responses.BadRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "The error object will explain why the entity was not found.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responses.NotFound"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -112,6 +169,34 @@
                 }
             }
         },
+        "responses.NotFound": {
+            "type": "object",
+            "properties": {
+                "ack": {
+                    "description": "Ack Defines if the request was successful or not.",
+                    "type": "object",
+                    "$ref": "#/definitions/responses.Ack"
+                },
+                "error": {
+                    "description": "Error Explains why the server is responding with a bad request.",
+                    "type": "object",
+                    "$ref": "#/definitions/responses.Error"
+                }
+            }
+        },
+        "user.User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "the userId",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "the username",
+                    "type": "string"
+                }
+            }
+        },
         "user.createUserRequest": {
             "type": "object",
             "properties": {
@@ -124,6 +209,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

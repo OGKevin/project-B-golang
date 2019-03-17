@@ -89,11 +89,13 @@ func newGetUser(users Users) *getUser {
 // @ID get-user
 // @Accept  json
 // @Produce  json
-// @Param userId url string true "The id to get the user"
-// @Success 200 {object} User "The user"
+// @Security ApiKeyAuth
+// @Param userId path string true "The id to get the user"
+// @Param Authorization header string true "The BEARER token"
+// @Success 200 {object} user.User "The user"
 // @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
 // @Failure 404 {object} responses.NotFound "The error object will explain why the entity was not found."
-// @Router /user [post]
+// @Router /user/{userId} [get]
 func (g getUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "userId")
 	userUuid, err := uuid.FromString(userId)
@@ -105,7 +107,7 @@ func (g getUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, err := g.users.Get(userUuid)
 	if err != nil {
 		responses.WriteNotFound(w, responses.NewErrorf("user %q not found", userUuid))
-		logrus.WithError(err).Errorf("user %q not found")
+		logrus.WithError(err).Errorf("user %q not found", userUuid)
 		return
 	}
 
