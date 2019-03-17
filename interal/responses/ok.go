@@ -10,7 +10,9 @@ import (
 )
 
 type Created struct {
+	// Ack Defines if the request was successful or not.
 	Ack Ack       `gojay:"ack,object"`
+	// ID The id of the newly created entity.
 	ID  uuid.UUID `gojay:"id"`
 }
 

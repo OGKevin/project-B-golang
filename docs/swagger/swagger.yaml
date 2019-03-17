@@ -3,37 +3,46 @@ definitions:
   responses.Ack:
     properties:
       ack:
+        description: Ack Defines if the server could acknowledge the request.
         type: boolean
     type: object
   responses.BadRequest:
     properties:
       ack:
         $ref: '#/definitions/responses.Ack'
+        description: Ack Defines if the request was successful or not.
         type: object
       error:
         $ref: '#/definitions/responses.Error'
+        description: Error Explains why the server is responding with a bad request.
         type: object
     type: object
   responses.Created:
     properties:
       ack:
         $ref: '#/definitions/responses.Ack'
+        description: Ack Defines if the request was successful or not.
         type: object
       id:
+        description: ID The id of the newly created entity.
         type: string
     type: object
   responses.Error:
     properties:
       code:
+        description: Coode The http status code that belongs to this error.
         type: integer
       message:
+        description: Message The message explaining the error.
         type: string
     type: object
   user.createUserRequest:
     properties:
       password:
+        description: Password The user's password, must be length(5|255)
         type: string
       username:
+        description: Username The user's username, must be unique and length(5|255)
         type: string
     type: object
 host: project-b.ogkevin.nl

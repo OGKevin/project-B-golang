@@ -11,7 +11,9 @@ import (
 )
 
 type createUserRequest struct {
+	// Username The user's username, must be unique and length(5|255)
 	Username string `gojay:"username"valid:"length(5|255)"`
+	// Password The user's password, must be length(5|255)
 	Password string `gojay:"password"valid:"length(10|255)"`
 
 	user Users `gojay:"-"json:"-"`

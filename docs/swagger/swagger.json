@@ -65,6 +65,7 @@
             "type": "object",
             "properties": {
                 "ack": {
+                    "description": "Ack Defines if the server could acknowledge the request.",
                     "type": "boolean"
                 }
             }
@@ -73,10 +74,12 @@
             "type": "object",
             "properties": {
                 "ack": {
+                    "description": "Ack Defines if the request was successful or not.",
                     "type": "object",
                     "$ref": "#/definitions/responses.Ack"
                 },
                 "error": {
+                    "description": "Error Explains why the server is responding with a bad request.",
                     "type": "object",
                     "$ref": "#/definitions/responses.Error"
                 }
@@ -86,10 +89,12 @@
             "type": "object",
             "properties": {
                 "ack": {
+                    "description": "Ack Defines if the request was successful or not.",
                     "type": "object",
                     "$ref": "#/definitions/responses.Ack"
                 },
                 "id": {
+                    "description": "ID The id of the newly created entity.",
                     "type": "string"
                 }
             }
@@ -98,9 +103,11 @@
             "type": "object",
             "properties": {
                 "code": {
+                    "description": "Coode The http status code that belongs to this error.",
                     "type": "integer"
                 },
                 "message": {
+                    "description": "Message The message explaining the error.",
                     "type": "string"
                 }
             }
@@ -109,9 +116,11 @@
             "type": "object",
             "properties": {
                 "password": {
+                    "description": "Password The user's password, must be length(5|255)",
                     "type": "string"
                 },
                 "username": {
+                    "description": "Username The user's username, must be unique and length(5|255)",
                     "type": "string"
                 }
             }
