@@ -70,12 +70,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: The response will include the id of the newly created user.
           schema:
             $ref: '#/definitions/responses.Created'
             type: object
         "400":
-          description: Bad Request
+          description: The error object will explain why the request failed.
           schema:
             $ref: '#/definitions/responses.BadRequest'
             type: object

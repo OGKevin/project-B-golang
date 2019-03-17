@@ -28,8 +28,8 @@ func NewCreateUserRequest(user Users) *createUserRequest {
 // @Accept  json
 // @Produce  json
 // @Param body body user.createUserRequest true "The expected request body. Username must be length(5|255) and Password length(10|255)."
-// @Success 200 {object} responses.Created
-// @Failure 400 {object} responses.BadRequest
+// @Success 200 {object} responses.Created "The response will include the id of the newly created user."
+// @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
 // @Router /user [post]
 func (b *createUserRequest) ServeHttp(w http.ResponseWriter, r *http.Request) {
 	err := gojay.NewDecoder(r.Body).DecodeObject(b)
