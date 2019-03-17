@@ -12,6 +12,8 @@ docker build --build-arg TAG=${TRAVIS_COMMIT} -t ogkevin/${PROJECT_NAME}:${TRAVI
 
 docker push ogkevin/${PROJECT_NAME}:${TRAVIS_COMMIT}
 
+export DB_PATH=$(printf ${DB_PATH} | base64 -D)
+
 go run cmd/migrations/main.go up
 go run cmd/migrations/main.go status
 
