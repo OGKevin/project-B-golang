@@ -5,7 +5,9 @@ import (
 	"github.com/OGKevin/project-B-golang/interal/responses"
 	"github.com/asaskevich/govalidator"
 	"github.com/francoispqt/gojay"
+	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
+	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -69,5 +71,48 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 		handleError(w, r, errors.Cause(err))
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+type getUser struct {
+	// gets ID information
+	users Users
+}
+
+func newGetUser(users Users) *getUser {
+	return &getUser{users: users}
+}
+
+// GetUser gets user by id
+// @Summary gets user by id
+// @Description gets user by id
+// @ID get-user
+// @Accept  json
+// @Produce  json
+// @Param userId url string true "The id to get the user"
+// @Success 200 {object} User "The user"
+// @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
+// @Failure 404 {object} responses.NotFound "The error object will explain why the entity was not found."
+// @Router /user [post]
+func (g getUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "userId")
+	userUuid, err := uuid.FromString(userId)
+	if err != nil {
+		responses.WriteBadRequests(w, responses.NewErrorf("%s is not a valid userID", userId))
+		logrus.WithError(err).Errorf("%q is not a valid userId", userId)
+		return
+	}
+	user, err := g.users.Get(userUuid)
+	if err != nil {
+		responses.WriteNotFound(w, responses.NewErrorf("user %q not found", userUuid))
+		logrus.WithError(err).Errorf("user %q not found")
+		return
+	}
+
+	err = gojay.NewEncoder(w).Encode(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		logrus.WithError(err).Error("Could not write response for 'get user'")
+		return
 	}
 }

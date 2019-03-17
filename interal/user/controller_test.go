@@ -23,13 +23,13 @@ func newResponseWriter() *httptest.ResponseRecorder {
 
 func TestCreateUser(t *testing.T) {
 	type args struct {
-		w   http.ResponseWriter
-		r   *http.Request
+		w http.ResponseWriter
+		r *http.Request
 	}
 	tests := []struct {
-		name string
-		args args
-		code int
+		name  string
+		args  args
+		code  int
 		users Users
 	}{
 		{
@@ -38,7 +38,7 @@ func TestCreateUser(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t)),
 			},
-			code: 201,
+			code:  201,
 			users: &usersForTest{},
 		},
 		{
@@ -47,7 +47,7 @@ func TestCreateUser(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t)),
 			},
-			code: 400,
+			code:  400,
 			users: &usersForTest{usernameNotUnique: true},
 		},
 		{
@@ -56,7 +56,7 @@ func TestCreateUser(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t)),
 			},
-			code: 500,
+			code:  500,
 			users: &usersForTest{creationFailed: true},
 		},
 		{
@@ -65,7 +65,7 @@ func TestCreateUser(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString("")),
 			},
-			code: 400,
+			code:  400,
 			users: &usersForTest{},
 		},
 		{
@@ -74,7 +74,7 @@ func TestCreateUser(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString("{}")),
 			},
-			code: 400,
+			code:  400,
 			users: &usersForTest{},
 		},
 	}
@@ -101,7 +101,11 @@ func createUserBody(t *testing.T) io.Reader {
 
 type usersForTest struct {
 	usernameNotUnique bool
-	creationFailed bool
+	creationFailed    bool
+}
+
+func (u *usersForTest) Get(id uuid.UUID) (*User, error) {
+	return u.Create("Sjaak", nil)
 }
 
 func (u *usersForTest) IsUsernameUnique(username string) (bool, error) {
