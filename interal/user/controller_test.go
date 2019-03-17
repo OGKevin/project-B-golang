@@ -145,7 +145,7 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		code int
+		code   int
 	}{
 		{
 			name: "get user",
