@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "github.com/OGKevin/project-B-golang/docs"
+	"github.com/OGKevin/project-B-golang/interal/acl"
 	"github.com/OGKevin/project-B-golang/interal/database"
 	"github.com/OGKevin/project-B-golang/interal/logging"
 	"github.com/OGKevin/project-B-golang/interal/response"
@@ -11,13 +12,16 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/docgen"
+	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"github.com/swaggo/http-swagger"
 	"net/http"
+	"os"
 	"strings"
 	"time"
+	"github.com/casbin/xorm-adapter"
 )
 
 func init() {
@@ -74,6 +78,10 @@ func main() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 // @host project-b.ogkevin.nl
 // @BasePath /api/v1
 func createRouter(db *sqlx.DB) *chi.Mux{
@@ -96,11 +104,15 @@ func createRouter(db *sqlx.DB) *chi.Mux{
 }
 
 func apiRouter(db *sqlx.DB) chi.Router {
+	ja := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
+	e := acl.NewEnforcer(xormadapter.NewAdapter("mysql", os.Getenv("DB_PATH"), true))
+	e.EnableAutoSave(true)
+
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/swagger/doc.json", http.StatusPermanentRedirect)
 	})
-	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db)))
+	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db), ja, e))
 	return r
 }
 

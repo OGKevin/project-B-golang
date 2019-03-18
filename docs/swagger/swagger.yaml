@@ -36,6 +36,26 @@ definitions:
         description: Message The message explaining the error.
         type: string
     type: object
+  responses.NotFound:
+    properties:
+      ack:
+        $ref: '#/definitions/responses.Ack'
+        description: Ack Defines if the request was successful or not.
+        type: object
+      error:
+        $ref: '#/definitions/responses.Error'
+        description: Error Explains why the server is responding with a bad request.
+        type: object
+    type: object
+  user.User:
+    properties:
+      id:
+        description: the userId
+        type: string
+      username:
+        description: the username
+        type: string
+    type: object
   user.createUserRequest:
     properties:
       password:
@@ -89,4 +109,47 @@ paths:
             $ref: '#/definitions/responses.BadRequest'
             type: object
       summary: Register a new user
+  /user/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: gets user by id
+      operationId: get-user
+      parameters:
+      - description: The id to get the user
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: The BEARER token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The user
+          schema:
+            $ref: '#/definitions/user.User'
+            type: object
+        "400":
+          description: The error object will explain why the request failed.
+          schema:
+            $ref: '#/definitions/responses.BadRequest'
+            type: object
+        "404":
+          description: The error object will explain why the entity was not found.
+          schema:
+            $ref: '#/definitions/responses.NotFound'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: gets user by id
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

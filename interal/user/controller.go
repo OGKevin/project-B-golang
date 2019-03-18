@@ -2,10 +2,14 @@
 package user
 
 import (
+	"fmt"
 	"github.com/OGKevin/project-B-golang/interal/responses"
 	"github.com/asaskevich/govalidator"
+	"github.com/casbin/casbin"
 	"github.com/francoispqt/gojay"
+	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
+	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -17,10 +21,11 @@ type createUserRequest struct {
 	Password string `gojay:"password"valid:"length(10|255)"`
 
 	user Users `gojay:"-"json:"-"`
+	e *casbin.Enforcer `golay:"-"json:"-"`
 }
 
-func NewCreateUserRequest(user Users) *createUserRequest {
-	return &createUserRequest{user: user}
+func NewCreateUserRequest(user Users, e *casbin.Enforcer) *createUserRequest {
+	return &createUserRequest{user: user, e: e}
 }
 
 // CreateUser Crates a new user
@@ -52,6 +57,11 @@ func (b *createUserRequest) ServeHttp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	 ok := b.e.AddPolicy(u.ID.String(), fmt.Sprintf("*/user/%s", u.ID), fmt.Sprintf("(%s)|(%s)|(%s)", http.MethodGet, http.MethodPut, http.MethodDelete))
+	 if !ok {
+	 	logrus.Error("could not add policy")
+	 }
+
 	responses.WriteCreated(w, u.ID)
 }
 
@@ -69,5 +79,50 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 		handleError(w, r, errors.Cause(err))
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+type getUser struct {
+	// gets ID information
+	users Users
+}
+
+func newGetUser(users Users) *getUser {
+	return &getUser{users: users}
+}
+
+// GetUser gets user by id
+// @Summary gets user by id
+// @Description gets user by id
+// @ID get-user
+// @Accept  json
+// @Produce  json
+// @Security ApiKeyAuth
+// @Param userId path string true "The id to get the user"
+// @Param Authorization header string true "The BEARER token"
+// @Success 200 {object} user.User "The user"
+// @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
+// @Failure 404 {object} responses.NotFound "The error object will explain why the entity was not found."
+// @Router /user/{userId} [get]
+func (g getUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "userId")
+	userUuid, err := uuid.FromString(userId)
+	if err != nil {
+		responses.WriteBadRequests(w, responses.NewErrorf("%s is not a valid userID", userId))
+		logrus.WithError(err).Errorf("%q is not a valid userId", userId)
+		return
+	}
+	user, err := g.users.Get(userUuid)
+	if err != nil {
+		responses.WriteNotFound(w, responses.NewErrorf("user %q not found", userUuid))
+		logrus.WithError(err).Errorf("user %q not found", userUuid)
+		return
+	}
+
+	err = gojay.NewEncoder(w).Encode(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		logrus.WithError(err).Error("Could not write response for 'get user'")
+		return
 	}
 }
