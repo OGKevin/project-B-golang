@@ -28,6 +28,7 @@ func (v *User) NKeys() int { return 2 }
 func (v *User) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("id", v.ID.String())
 	enc.StringKey("username", v.Username)
+	enc.StringKey("password", v.Password)
 }
 
 // IsNil returns wether the structure is nil value or not

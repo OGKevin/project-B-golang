@@ -56,7 +56,15 @@ definitions:
         description: the username
         type: string
     type: object
-  user.createUserRequest:
+  user.jwtToken:
+    properties:
+      ack:
+        $ref: '#/definitions/responses.Ack'
+        type: object
+      token:
+        type: string
+    type: object
+  user.userRequest:
     properties:
       password:
         description: Password The user's password, must be length(5|255)
@@ -93,7 +101,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/user.createUserRequest'
+          $ref: '#/definitions/user.userRequest'
           type: object
       produces:
       - application/json
@@ -147,6 +155,34 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: gets user by id
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: on success, you will get a JWT token to put in the auth header
+      operationId: user-login
+      parameters:
+      - description: The expected request body.
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.userRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The user
+          schema:
+            $ref: '#/definitions/user.jwtToken'
+            type: object
+        "400":
+          description: The error object will explain why the request failed.
+          schema:
+            $ref: '#/definitions/responses.BadRequest'
+            type: object
+      summary: logs a user in
 securityDefinitions:
   ApiKeyAuth:
     in: header

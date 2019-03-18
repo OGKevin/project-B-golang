@@ -12,10 +12,32 @@ type Users interface {
 	Create(username string, password []byte) (*User, error)
 	IsUsernameUnique(username string) (bool, error)
 	Get(id uuid.UUID) (*User, error)
+	GetByUsername(username string) (*User, error)
 }
 
 type UsersDatabase struct {
 	db *sqlx.DB
+}
+
+func (u *UsersDatabase) GetByUsername(username string) (*User, error) {
+	rows, err := u.db.Queryx(`select id, password from users where username = ? limit 1`, username)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to execute - select from users")
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, errors.New("there seems to be no results in rows")
+	}
+
+	var user User
+	err = rows.StructScan(&user)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not scan rows to get user")
+	}
+
+	return &user, nil
 }
 
 func (u *UsersDatabase) Get(id uuid.UUID) (*User, error) {
@@ -23,7 +45,9 @@ func (u *UsersDatabase) Get(id uuid.UUID) (*User, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to execute - select from users")
 	}
+
 	defer rows.Close()
+
 	if !rows.Next() {
 		return nil, errors.New("there seems to be no results in rows")
 	}

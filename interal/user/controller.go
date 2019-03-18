@@ -1,25 +1,31 @@
-//go:generate gojay -s=$GOFILE -t=createUserRequest -o=generated_$GOFILE
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/OGKevin/project-B-golang/interal/responses"
 	"github.com/asaskevich/govalidator"
 	"github.com/casbin/casbin"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/francoispqt/gojay"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/jwtauth"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
 
-type createUserRequest struct {
+type userRequest struct {
 	// Username The user's username, must be unique and length(5|255)
-	Username string `gojay:"username"valid:"length(5|255)"`
+	Username string `json:"username"valid:"length(5|255)"`
 	// Password The user's password, must be length(5|255)
-	Password string `gojay:"password"valid:"length(10|255)"`
+	Password string `json:"password"valid:"length(10|255)"`
+}
 
+type createUserRequest struct {
 	user Users `gojay:"-"json:"-"`
 	e *casbin.Enforcer `golay:"-"json:"-"`
 }
@@ -34,24 +40,25 @@ func NewCreateUserRequest(user Users, e *casbin.Enforcer) *createUserRequest {
 // @ID register-new-user
 // @Accept  json
 // @Produce  json
-// @Param body body user.createUserRequest true "The expected request body. Username must be length(5|255) and Password length(10|255)."
+// @Param body body user.userRequest true "The expected request body. Username must be length(5|255) and Password length(10|255)."
 // @Success 200 {object} responses.Created "The response will include the id of the newly created user."
 // @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
 // @Router /user [post]
-func (b *createUserRequest) ServeHttp(w http.ResponseWriter, r *http.Request) {
-	err := gojay.NewDecoder(r.Body).DecodeObject(b)
+func (b *createUserRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var ur userRequest
+	err := json.NewDecoder(r.Body).Decode(&ur)
 	if err != nil {
 		logrus.WithError(err).Error("could not decode body")
 		responses.WriteBadRequests(w, responses.NewError("Request body seems to not be a valid json."))
 		return
 	}
 
-	if valid, err := govalidator.ValidateStruct(b); !valid {
+	if valid, err := govalidator.ValidateStruct(ur); !valid {
 		responses.WriteBadRequests(w, responses.NewValidationError(err.Error()))
 		return
 	}
 
-	u, err := NewUser(b.Username, b.Password, b.user)
+	u, err := NewUser(ur.Username, []byte(ur.Password), b.user)
 	if err != nil {
 		handleError(w, r, err)
 		return
@@ -123,6 +130,82 @@ func (g getUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		logrus.WithError(err).Error("Could not write response for 'get user'")
+		return
+	}
+}
+
+type login struct {
+	users Users
+
+	ja *jwtauth.JWTAuth
+}
+
+func newLogin(users Users, ja *jwtauth.JWTAuth) *login {
+	return &login{users: users, ja: ja}
+}
+
+type jwtToken struct {
+	Ack responses.Ack `json:"ack"`
+	Token string `json:"token"`
+}
+
+// Login on success, you will get a JWT token to put in the auth header
+// @Summary logs a user in
+// @Description on success, you will get a JWT token to put in the auth header
+// @ID user-login
+// @Accept  json
+// @Produce  json
+// @Param body body user.userRequest true "The expected request body."
+// @Success 200 {object} user.jwtToken "The user"
+// @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
+// @Router /user/login [post]
+func (l login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var ur userRequest
+	err := json.NewDecoder(r.Body).Decode(&ur)
+	if err != nil {
+		logrus.WithError(err).Error("could not decode body")
+		responses.WriteBadRequests(w, responses.NewError("Request body seems to not be a valid json."))
+		return
+	}
+
+	if valid, err := govalidator.ValidateStruct(ur); !valid {
+		responses.WriteBadRequests(w, responses.NewValidationError(err.Error()))
+		return
+	}
+
+	u, err := l.users.GetByUsername(ur.Username)
+	if err != nil {
+		logrus.WithError(err).Error("could not get user by username")
+		http.Error(w, "username or password incorrect", http.StatusUnauthorized)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(ur.Password))
+	if err != nil {
+		if err == bcrypt.ErrMismatchedHashAndPassword {
+			http.Error(w, "username or password incorrect", http.StatusUnauthorized)
+			return
+		}
+
+		logrus.WithError(err).Error("could not verify user's password")
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	claim := jwt.MapClaims{"user_id": u.ID.String()}
+	jwtauth.SetExpiryIn(claim, time.Hour)
+	jwtauth.SetIssuedNow(claim)
+
+	t, _, err := l.ja.Encode(claim)
+	if err != nil {
+		logrus.WithError(err).Error("could not create new auth token")
+		http.Error(w, "", http.StatusServiceUnavailable)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(&jwtToken{Token:t.Raw, Ack: responses.Ack{Ack:true}})
+	if err != nil {
+		logrus.WithError(err).Error("could not write response")
 		return
 	}
 }
