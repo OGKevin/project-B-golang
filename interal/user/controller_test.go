@@ -2,18 +2,20 @@ package user
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/OGKevin/project-B-golang/interal/acl"
-	"github.com/OGKevin/xorm-adapter"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/jwtauth"
+	"golang.org/x/crypto/bcrypt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/OGKevin/project-B-golang/interal/acl"
+	"github.com/OGKevin/xorm-adapter"
 	"github.com/asaskevich/govalidator"
 	"github.com/francoispqt/gojay"
+	"github.com/go-chi/jwtauth"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
@@ -43,7 +45,7 @@ func TestCreateUser(t *testing.T) {
 			name: "created",
 			args: args{
 				w: newResponseWriter(),
-				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t)),
+				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t, uuid.NewV4())),
 			},
 			code:  201,
 			users: &usersForTest{},
@@ -52,7 +54,7 @@ func TestCreateUser(t *testing.T) {
 			name: "username not unique",
 			args: args{
 				w: newResponseWriter(),
-				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t)),
+				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t, uuid.NewV4())),
 			},
 			code:  400,
 			users: &usersForTest{usernameNotUnique: true},
@@ -61,7 +63,7 @@ func TestCreateUser(t *testing.T) {
 			name: "user creation failed",
 			args: args{
 				w: newResponseWriter(),
-				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t)),
+				r: httptest.NewRequest(http.MethodPost, "/", createUserBody(t, uuid.NewV4())),
 			},
 			code:  500,
 			users: &usersForTest{creationFailed: true},
@@ -93,6 +95,7 @@ func TestCreateUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			m := BuildRouter(tt.users, ja, e)
 			m.ServeHTTP(tt.args.w, tt.args.r)
 
@@ -124,9 +127,9 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func createUserBody(t *testing.T) io.Reader {
+func createUserBody(t *testing.T, pass uuid.UUID) io.Reader {
 	buf := bytes.NewBufferString("")
-	err := gojay.NewEncoder(buf).EncodeObject(&createUserRequest{Username: uuid.NewV4().String(), Password: uuid.NewV4().String()})
+	err := json.NewEncoder(buf).Encode(&userRequest{Username: uuid.NewV4().String(), Password: pass.String()})
 	assert.NoError(t, err)
 
 	return buf
@@ -137,6 +140,32 @@ type usersForTest struct {
 	creationFailed    bool
 
 	userNotFound bool
+
+	password uuid.UUID
+}
+
+func (u *usersForTest) GetByUsername(username string) (*User, error) {
+	var pass uuid.UUID
+
+	if u.password == uuid.Nil {
+		pass = uuid.NewV4()
+	} else {
+		pass = u.password
+	}
+
+	str := pass.String()
+
+	p , err:= bcrypt.GenerateFromPassword([]byte(str), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+
+	err = bcrypt.CompareHashAndPassword(p, []byte(str))
+	if err != nil {
+		panic(err)
+	}
+
+	return &User{ID: uuid.NewV4(), Username: username, Password: string(p)}, nil
 }
 
 func (u *usersForTest) Get(id uuid.UUID) (*User, error) {
@@ -171,11 +200,11 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 		r *http.Request
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		code   int
-		userID uuid.UUID
+		name       string
+		fields     fields
+		args       args
+		code       int
+		userID     uuid.UUID
 		disableACL bool
 	}{
 		{
@@ -187,7 +216,7 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.FromStringOrNil("F852243B-6BE8-4AB3-A557-4584CF19ABB0")), nil),
 			},
-			code: http.StatusOK,
+			code:   http.StatusOK,
 			userID: uuid.FromStringOrNil("F852243B-6BE8-4AB3-A557-4584CF19ABB0"),
 		},
 		{
@@ -199,7 +228,7 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodGet, "/jhfsdkfhgasdjklfhjsd", nil),
 			},
-			code: http.StatusForbidden,
+			code:   http.StatusForbidden,
 			userID: uuid.NewV4(),
 		},
 		{
@@ -211,8 +240,8 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodGet, "/jhfsdkfhgasdjklfhjsd", nil),
 			},
-			code: http.StatusBadRequest,
-			userID: uuid.NewV4(),
+			code:       http.StatusBadRequest,
+			userID:     uuid.NewV4(),
 			disableACL: true,
 		},
 		{
@@ -224,10 +253,9 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.NewV4()), nil),
 			},
-			code: http.StatusNotFound,
-			userID: uuid.NewV4(),
+			code:       http.StatusNotFound,
+			userID:     uuid.NewV4(),
 			disableACL: true,
-
 		},
 		{
 			name: "get user with valid id not found",
@@ -238,7 +266,7 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.FromStringOrNil("AC0E1E53-5D16-4F3C-8780-54C3BBE02CDB")), nil),
 			},
-			code: http.StatusNotFound,
+			code:   http.StatusNotFound,
 			userID: uuid.FromStringOrNil("AC0E1E53-5D16-4F3C-8780-54C3BBE02CDB"),
 		},
 	}
@@ -260,6 +288,62 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 			token, _, _ := ja.Encode(jwt.MapClaims{"user_id": tt.userID})
 
 			tt.args.r.Header.Set("Authorization", fmt.Sprintf("BEARER %s", token.Raw))
+			r.ServeHTTP(tt.args.w, tt.args.r)
+
+			w := tt.args.w.(*httptest.ResponseRecorder)
+
+			assert.Equal(t, tt.code, w.Code)
+		})
+	}
+}
+
+func Test_login_ServeHTTP(t *testing.T) {
+	type fields struct {
+		users Users
+		ja    *jwtauth.JWTAuth
+	}
+	type args struct {
+		w http.ResponseWriter
+		r *http.Request
+	}
+
+	ja := jwtauth.New("HS256", []byte("secret"), nil)
+
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		code int
+	}{
+		{
+			name: "login ok",
+			fields: fields{
+				users: &usersForTest{password: uuid.FromStringOrNil("64EAE7E1-E192-434C-A314-C55FB3579C3A")},
+				ja: ja,
+			},
+			args: args{
+				w: newResponseWriter(),
+				r: httptest.NewRequest(http.MethodPost, "/login", createUserBody(t, uuid.FromStringOrNil("64EAE7E1-E192-434C-A314-C55FB3579C3A"))),
+			},
+			code: http.StatusOK,
+		},
+		{
+			name: "login invalid password",
+			fields: fields{
+				users: &usersForTest{password: uuid.FromStringOrNil("6967776D-5444-417E-BE40-0F4C61DC7F89")},
+				ja: ja,
+			},
+			args: args{
+				w: newResponseWriter(),
+				r: httptest.NewRequest(http.MethodPost, "/login", createUserBody(t, uuid.FromStringOrNil("64EAE7E1-E192-434C-A314-C55FB3579C3A"))),
+			},
+			code: http.StatusUnauthorized,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := BuildRouter(tt.fields.users, tt.fields.ja, nil)
+
 			r.ServeHTTP(tt.args.w, tt.args.r)
 
 			w := tt.args.w.(*httptest.ResponseRecorder)

@@ -37,7 +37,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/user.createUserRequest"
+                            "$ref": "#/definitions/user.userRequest"
                         }
                     }
                 ],
@@ -47,6 +47,47 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/responses.Created"
+                        }
+                    },
+                    "400": {
+                        "description": "The error object will explain why the request failed.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responses.BadRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "description": "on success, you will get a JWT token to put in the auth header",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "logs a user in",
+                "operationId": "user-login",
+                "parameters": [
+                    {
+                        "description": "The expected request body.",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/user.userRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/user.jwtToken"
                         }
                     },
                     "400": {
@@ -191,13 +232,28 @@
                     "description": "the userId",
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
                 "username": {
                     "description": "the username",
                     "type": "string"
                 }
             }
         },
-        "user.createUserRequest": {
+        "user.jwtToken": {
+            "type": "object",
+            "properties": {
+                "ack": {
+                    "type": "object",
+                    "$ref": "#/definitions/responses.Ack"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.userRequest": {
             "type": "object",
             "properties": {
                 "password": {

@@ -3,5 +3,5 @@ package responses
 
 type Ack struct {
 	// Ack Defines if the server could acknowledge the request.
-	Ack bool `gojay:"ack"`
+	Ack bool `gojay:"ack"json:"ack"`
 }

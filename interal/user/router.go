@@ -10,7 +10,8 @@ import (
 func BuildRouter(users Users, ja *jwtauth.JWTAuth, e *casbin.Enforcer) chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", NewCreateUserRequest(users, e).ServeHttp)
+	r.Post("/", NewCreateUserRequest(users, e).ServeHTTP)
+	r.Post("/login", newLogin(users, ja).ServeHTTP)
 
 	r.Route("/", func(r chi.Router) {
 		r.Use(jwtauth.Verifier(ja))

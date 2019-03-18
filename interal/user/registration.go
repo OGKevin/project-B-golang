@@ -12,13 +12,15 @@ import (
 
 type User struct {
 	// the userId
-	ID uuid.UUID `gojay:"id"`
+	ID uuid.UUID `gojay:"id"db:"id"`
 	// the username
-	Username string `gojay:"username"`
+	Username string `gojay:"username"db:"username"`
+
+	Password string `gojay:"-u"`
 }
 
 // CreateNewUser creates a new user.
-func NewUser(username, password string, users Users) (*User, error) {
+func NewUser(username string, password []byte, users Users) (*User, error) {
 	logging.Trace(logging.TraceTypeEntering)
 	defer logging.Trace(logging.TraceTypeExiting)
 
@@ -39,11 +41,11 @@ func NewUser(username, password string, users Users) (*User, error) {
 	return user, nil
 }
 
-func hashPassword(password string) ([]byte, error) {
+func hashPassword(password []byte) ([]byte, error) {
 	logging.Trace(logging.TraceTypeEntering)
 	defer logging.Trace(logging.TraceTypeExiting)
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	if err != nil {
 		logrus.WithError(err).Error("could not hash password")
 		return nil, errors.Wrap(err, "could not hash password")
