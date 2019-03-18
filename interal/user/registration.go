@@ -16,7 +16,7 @@ type User struct {
 	// the username
 	Username string `gojay:"username"db:"username"`
 
-	Password string `gojay:"-u"`
+	Password string `gojay:"-u"json:"-"`
 }
 
 // CreateNewUser creates a new user.

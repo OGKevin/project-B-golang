@@ -232,9 +232,6 @@
                     "description": "the userId",
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "username": {
                     "description": "the username",
                     "type": "string"
