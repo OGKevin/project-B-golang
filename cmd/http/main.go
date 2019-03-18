@@ -105,7 +105,7 @@ func createRouter(db *sqlx.DB) *chi.Mux{
 
 func apiRouter(db *sqlx.DB) chi.Router {
 	ja := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
-	e := acl.NewEnforcer(xormadapter.NewAdapter("mysql", os.Getenv("DB_PATH")))
+	e := acl.NewEnforcer(xormadapter.NewAdapter("mysql", os.Getenv("DB_PATH"), true))
 	e.EnableAutoSave(true)
 
 	r := chi.NewRouter()
