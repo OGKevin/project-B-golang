@@ -14,7 +14,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/francoispqt/gojay"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
