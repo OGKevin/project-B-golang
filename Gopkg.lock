@@ -2,6 +2,21 @@
 
 
 [[projects]]
+  digest = "1:a8bc08e25d94bdcbf8ea54ee8e4b2a00a8c3b6957501b4fdb1a6d303e5292f6d"
+  name = "github.com/Knetic/govaluate"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "d216395917cc49052c7c7094cf57f09657ca08a8"
+  version = "v3.0.0"
+
+[[projects]]
+  digest = "1:3fe593188f51fcaa6c6ef264b108b58d23a07c7cfd77e61d18a41aec216b43b1"
+  name = "github.com/OGKevin/xorm-adapter"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "726a539dd71d04906fe0b87dd1ae7eae8bac429a"
+
+[[projects]]
   digest = "1:0a111edd8693fd977f42a0c4f199a0efb13c20aec9da99ad8830c7bb6a87e8d6"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
@@ -35,6 +50,33 @@
   pruneopts = "NUT"
   revision = "ccb8e960c48f04d6935e72476ae4a51028f9e22f"
   version = "v9"
+
+[[projects]]
+  digest = "1:5234f50783a80b89c3044fcb5a5ca224774902540102f7e9d5e1165b1e0d513a"
+  name = "github.com/casbin/casbin"
+  packages = [
+    ".",
+    "config",
+    "effect",
+    "log",
+    "model",
+    "persist",
+    "persist/file-adapter",
+    "rbac",
+    "rbac/default-role-manager",
+    "util",
+  ]
+  pruneopts = "NUT"
+  revision = "4aa316fb68d44d4cc5ddd98d7e9ec80bc0a8b081"
+  version = "v1.8.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0241bf9e6fbd0a2cf727a2d1bdbb5fa1ed3f6073349b40f014feb642525cced4"
+  name = "github.com/casbin/xorm-adapter"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "e40cbd17d53fd7a5cee646cc1083631432bce8ee"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -128,6 +170,38 @@
   version = "v1.4.1"
 
 [[projects]]
+  digest = "1:06d21295033f211588d0ad7ff391cc1b27e72b60cb6d4b7db0d70cffae4cf228"
+  name = "github.com/go-xorm/builder"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "1d658d7596c25394aab557ef5b50ef35bf706384"
+  version = "v0.3.4"
+
+[[projects]]
+  digest = "1:b26928aab0fff92592e8728c5bc9d6e404fa2017d6a8e841ae5e60a42237f6fc"
+  name = "github.com/go-xorm/core"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ccc80c1adf1f6172bbc548877f50a1163041a40a"
+  version = "v0.6.2"
+
+[[projects]]
+  digest = "1:407316703b32d68ccf5d39bdae57d411b6954e253e07d0fff0988a3f39861f2f"
+  name = "github.com/go-xorm/xorm"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "1f39c590c64924f358c0d89016ac9b2bb84e9125"
+  version = "v0.7.1"
+
+[[projects]]
+  digest = "1:15a204bc73cf9a95e05f67e48c7f2001d5c7355b5998892d4e643c8dda4589f1"
+  name = "github.com/jinzhu/gorm"
+  packages = ["dialects/sqlite"]
+  pruneopts = "NUT"
+  revision = "472c70caa40267cb89fd8facb07fe6454b578626"
+  version = "v1.9.2"
+
+[[projects]]
   digest = "1:0c11e987235e8f37af4e9f24cca02754827d009e8b66cf24483b0006504f6045"
   name = "github.com/jmoiron/sqlx"
   packages = [
@@ -155,6 +229,17 @@
   version = "v1.0.2"
 
 [[projects]]
+  digest = "1:4d5fa9f49e5bf3d55c16ff562af9e3231f9ac5ccf495927fd0555f4607c15475"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "oid",
+  ]
+  pruneopts = "NUT"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:84a5a2b67486d5d67060ac393aa255d05d24ed5ee41daecd5635ec22657b6492"
   name = "github.com/mailru/easyjson"
@@ -165,6 +250,14 @@
   ]
   pruneopts = "NUT"
   revision = "6243d8e04c3f819e79757e8bc3faa15c3cb27003"
+
+[[projects]]
+  digest = "1:c9724c929d27a14475a45b17a267dbc60671c0bc2c5c05ed21f011f7b5bc9fb5"
+  name = "github.com/mattn/go-sqlite3"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "c7c4067b79cc51e6dfdcef5c702e74b1e0fa7c75"
+  version = "v1.10.0"
 
 [[projects]]
   digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
@@ -331,14 +424,20 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/OGKevin/xorm-adapter",
     "github.com/alecthomas/template",
     "github.com/asaskevich/govalidator",
+    "github.com/casbin/casbin",
+    "github.com/casbin/casbin/persist",
+    "github.com/casbin/xorm-adapter",
+    "github.com/dgrijalva/jwt-go",
     "github.com/francoispqt/gojay",
     "github.com/go-chi/chi",
     "github.com/go-chi/chi/middleware",
     "github.com/go-chi/docgen",
     "github.com/go-chi/jwtauth",
     "github.com/go-sql-driver/mysql",
+    "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/jmoiron/sqlx",
     "github.com/joho/godotenv",
     "github.com/pkg/errors",

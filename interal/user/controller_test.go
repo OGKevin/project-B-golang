@@ -3,6 +3,8 @@ package user
 import (
 	"bytes"
 	"fmt"
+	"github.com/OGKevin/project-B-golang/interal/acl"
+	"github.com/OGKevin/xorm-adapter"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"io"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/francoispqt/gojay"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -82,14 +85,40 @@ func TestCreateUser(t *testing.T) {
 			users: &usersForTest{},
 		},
 	}
+
+	ja := jwtauth.New("HS256", []byte("secret"), nil)
+	e := acl.NewEnforcer(xormadapter.NewAdapter("sqlite3", "file::memory:?mode=memory&cache=shared"))
+	e.EnableLog(true)
+	e.EnableAutoSave(true)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := BuildRouter(tt.users, jwtauth.New("HS256", []byte("secret"), nil))
+			m := BuildRouter(tt.users, ja, e)
 			m.ServeHTTP(tt.args.w, tt.args.r)
 
 			w := tt.args.w.(*httptest.ResponseRecorder)
 			if !assert.Equal(t, tt.code, w.Code) {
 				return
+			}
+
+			if w.Code == http.StatusCreated {
+				var u User
+				if !assert.NoError(t, gojay.NewDecoder(w.Body).DecodeObject(&u)) {
+					return
+				}
+
+				w := newResponseWriter()
+				r := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", u.ID), nil)
+				token, _, err := ja.Encode(jwt.MapClaims{"user_id": u.ID.String()})
+				if !assert.NoError(t, err) {
+					return
+				}
+
+				r.Header.Set("Authorization", fmt.Sprintf("BEARER %s", token.Raw))
+
+				m.ServeHTTP(w, r)
+
+				assert.Equal(t, http.StatusOK, w.Code)
 			}
 		})
 	}
@@ -146,6 +175,8 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 		fields fields
 		args   args
 		code   int
+		userID uuid.UUID
+		disableACL bool
 	}{
 		{
 			name: "get user",
@@ -154,9 +185,10 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 			},
 			args: args{
 				w: newResponseWriter(),
-				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.NewV4()), nil),
+				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.FromStringOrNil("F852243B-6BE8-4AB3-A557-4584CF19ABB0")), nil),
 			},
 			code: http.StatusOK,
+			userID: uuid.FromStringOrNil("F852243B-6BE8-4AB3-A557-4584CF19ABB0"),
 		},
 		{
 			name: "get user with invalid id",
@@ -167,10 +199,24 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				w: newResponseWriter(),
 				r: httptest.NewRequest(http.MethodGet, "/jhfsdkfhgasdjklfhjsd", nil),
 			},
-			code: http.StatusBadRequest,
+			code: http.StatusForbidden,
+			userID: uuid.NewV4(),
 		},
 		{
-			name: "get user with valid id not found",
+			name: "get user with invalid id w o acl",
+			fields: fields{
+				users: &usersForTest{},
+			},
+			args: args{
+				w: newResponseWriter(),
+				r: httptest.NewRequest(http.MethodGet, "/jhfsdkfhgasdjklfhjsd", nil),
+			},
+			code: http.StatusBadRequest,
+			userID: uuid.NewV4(),
+			disableACL: true,
+		},
+		{
+			name: "get user id not found w o acl",
 			fields: fields{
 				users: &usersForTest{userNotFound: true},
 			},
@@ -179,15 +225,39 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.NewV4()), nil),
 			},
 			code: http.StatusNotFound,
+			userID: uuid.NewV4(),
+			disableACL: true,
+
+		},
+		{
+			name: "get user with valid id not found",
+			fields: fields{
+				users: &usersForTest{userNotFound: true},
+			},
+			args: args{
+				w: newResponseWriter(),
+				r: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.FromStringOrNil("AC0E1E53-5D16-4F3C-8780-54C3BBE02CDB")), nil),
+			},
+			code: http.StatusNotFound,
+			userID: uuid.FromStringOrNil("AC0E1E53-5D16-4F3C-8780-54C3BBE02CDB"),
 		},
 	}
 
 	ja := jwtauth.New("HS256", []byte("secret"), nil)
+	e := acl.NewEnforcer(xormadapter.NewAdapter("sqlite3", "file::memory:?mode=memory&cache=shared"))
+	e.EnableLog(true)
+	e.EnableAutoSave(true)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := BuildRouter(tt.fields.users, ja)
-			token, _, _ := ja.Encode(jwt.MapClaims{"some": "user"})
+			e.AddPolicy(tt.userID.String(), fmt.Sprintf("/%s", tt.userID), http.MethodGet)
+
+			if tt.disableACL {
+				e.EnableEnforce(false)
+			}
+
+			r := BuildRouter(tt.fields.users, ja, e)
+			token, _, _ := ja.Encode(jwt.MapClaims{"user_id": tt.userID})
 
 			tt.args.r.Header.Set("Authorization", fmt.Sprintf("BEARER %s", token.Raw))
 			r.ServeHTTP(tt.args.w, tt.args.r)

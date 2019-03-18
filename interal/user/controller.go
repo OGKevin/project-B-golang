@@ -2,8 +2,10 @@
 package user
 
 import (
+	"fmt"
 	"github.com/OGKevin/project-B-golang/interal/responses"
 	"github.com/asaskevich/govalidator"
+	"github.com/casbin/casbin"
 	"github.com/francoispqt/gojay"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
@@ -19,10 +21,11 @@ type createUserRequest struct {
 	Password string `gojay:"password"valid:"length(10|255)"`
 
 	user Users `gojay:"-"json:"-"`
+	e *casbin.Enforcer `golay:"-"json:"-"`
 }
 
-func NewCreateUserRequest(user Users) *createUserRequest {
-	return &createUserRequest{user: user}
+func NewCreateUserRequest(user Users, e *casbin.Enforcer) *createUserRequest {
+	return &createUserRequest{user: user, e: e}
 }
 
 // CreateUser Crates a new user
@@ -53,6 +56,11 @@ func (b *createUserRequest) ServeHttp(w http.ResponseWriter, r *http.Request) {
 		handleError(w, r, err)
 		return
 	}
+
+	 ok := b.e.AddPolicy(u.ID.String(), fmt.Sprintf("*/user/%s", u.ID), fmt.Sprintf("(%s)|(%s)|(%s)", http.MethodGet, http.MethodPut, http.MethodDelete))
+	 if !ok {
+	 	logrus.Error("could not add policy")
+	 }
 
 	responses.WriteCreated(w, u.ID)
 }

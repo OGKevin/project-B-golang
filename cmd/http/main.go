@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "github.com/OGKevin/project-B-golang/docs"
+	"github.com/OGKevin/project-B-golang/interal/acl"
 	"github.com/OGKevin/project-B-golang/interal/database"
 	"github.com/OGKevin/project-B-golang/interal/logging"
 	"github.com/OGKevin/project-B-golang/interal/response"
@@ -20,6 +21,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/casbin/xorm-adapter"
 )
 
 func init() {
@@ -103,12 +105,14 @@ func createRouter(db *sqlx.DB) *chi.Mux{
 
 func apiRouter(db *sqlx.DB) chi.Router {
 	ja := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
+	e := acl.NewEnforcer(xormadapter.NewAdapter("mysql", os.Getenv("DB_PATH")))
+	e.EnableAutoSave(true)
 
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/swagger/doc.json", http.StatusPermanentRedirect)
 	})
-	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db), ja))
+	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db), ja, e))
 	return r
 }
 
