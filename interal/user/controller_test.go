@@ -96,7 +96,7 @@ func TestCreateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			m := BuildRouter(tt.users, ja, e)
+			m := NewRouter(tt.users, ja, e)
 			m.ServeHTTP(tt.args.w, tt.args.r)
 
 			w := tt.args.w.(*httptest.ResponseRecorder)
@@ -284,7 +284,7 @@ func Test_getUser_ServeHTTP(t *testing.T) {
 				e.EnableEnforce(false)
 			}
 
-			r := BuildRouter(tt.fields.users, ja, e)
+			r := NewRouter(tt.fields.users, ja, e)
 			token, _, _ := ja.Encode(jwt.MapClaims{"user_id": tt.userID})
 
 			tt.args.r.Header.Set("Authorization", fmt.Sprintf("BEARER %s", token.Raw))
@@ -342,7 +342,7 @@ func Test_login_ServeHTTP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := BuildRouter(tt.fields.users, tt.fields.ja, nil)
+			r := NewRouter(tt.fields.users, tt.fields.ja, nil)
 
 			r.ServeHTTP(tt.args.w, tt.args.r)
 

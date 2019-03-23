@@ -3,6 +3,7 @@ package main
 import (
 	_ "github.com/OGKevin/project-B-golang/docs"
 	"github.com/OGKevin/project-B-golang/interal/acl"
+	"github.com/OGKevin/project-B-golang/interal/coordinates"
 	"github.com/OGKevin/project-B-golang/interal/database"
 	"github.com/OGKevin/project-B-golang/interal/logging"
 	"github.com/OGKevin/project-B-golang/interal/response"
@@ -112,7 +113,8 @@ func apiRouter(db *sqlx.DB) chi.Router {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/swagger/doc.json", http.StatusPermanentRedirect)
 	})
-	r.Mount("/user", user.BuildRouter(user.NewUsersDatabase(db), ja, e))
+	r.Mount("/user", user.NewRouter(user.NewUsersDatabase(db), ja, e))
+	r.Mount("/coordinates", coordinates.NewRouter(coordinates.NewCoordinatesFromDatabase(db), ja, e))
 	return r
 }
 

@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/jwtauth"
 )
 
-func BuildRouter(users Users, ja *jwtauth.JWTAuth, e *casbin.Enforcer) chi.Router {
+func NewRouter(users Users, ja *jwtauth.JWTAuth, e *casbin.Enforcer) chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/", NewCreateUserRequest(users, e).ServeHTTP)
