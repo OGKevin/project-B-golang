@@ -7,10 +7,9 @@ import (
 )
 
 type Point struct {
-	*geo.Point
-
 	ID uuid.UUID
 	UserID uuid.UUID
+	Coordinates *geo.Point
 }
 
 type coordinates interface {
