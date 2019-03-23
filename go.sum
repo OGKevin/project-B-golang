@@ -10,6 +10,8 @@ github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/OGKevin/xorm-adapter v0.0.0-20181207150928-e40cbd17d53f h1:w8NOf357aQy2Ac9ZgU+yy9+yxI2QY51qUfthgTn+/fM=
 github.com/OGKevin/xorm-adapter v0.0.0-20181207150928-e40cbd17d53f/go.mod h1:M55mm4fl+x16uDyAob8rU+IIFfAezi8w2T4V0+qG4rc=
+github.com/OGKevin/xorm-adapter v0.0.0-20190323205759-ef254d8a357f h1:Qn7YaOJwU2Qob83ItPWDb+pp1Emo3hamUr1Iq6ZDOXk=
+github.com/OGKevin/xorm-adapter v0.0.0-20190323205759-ef254d8a357f/go.mod h1:M55mm4fl+x16uDyAob8rU+IIFfAezi8w2T4V0+qG4rc=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/purell v1.1.1 h1:WEQqlqaGbrPkxLJWfBwQmfEAE1Z7ONdDLqrN38tNFfI=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
@@ -25,8 +27,6 @@ github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24
 github.com/bradfitz/go-smtpd v0.0.0-20170404230938-deb6d6237625/go.mod h1:HYsPBTaaSFSlLx/70C2HPIMNZpVV8+vt/A+FMnYP11g=
 github.com/casbin/casbin v1.8.1 h1:BVvL6H0nc+1y68nwIe8ZxwMIOEVUgg9y00yeD3GTDCc=
 github.com/casbin/casbin v1.8.1/go.mod h1:z8uPsfBJGUsnkagrt3G8QvjgTKFMBJ32UP8HpZllfog=
-github.com/casbin/xorm-adapter v0.0.0-20181207150928-e40cbd17d53f h1:dZTq4p7YkpfIegBuSmgQqxu1Mp6BSUPrYcSC9BgDJ+4=
-github.com/casbin/xorm-adapter v0.0.0-20181207150928-e40cbd17d53f/go.mod h1:6sy40UQdWR0blO1DJdEzbcu6rcEW89odCMcEdoB1qdM=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cockroachdb/apd v1.1.0 h1:3LFP3629v+1aKXU5Q37mxmRxX/pIu1nijXydLShEq5I=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=

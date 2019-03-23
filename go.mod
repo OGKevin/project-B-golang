@@ -2,12 +2,11 @@ module github.com/OGKevin/project-B-golang
 
 require (
 	cloud.google.com/go v0.37.1 // indirect
-	github.com/OGKevin/xorm-adapter v0.0.0-20181207150928-e40cbd17d53f
+	github.com/OGKevin/xorm-adapter v0.0.0-20190323205759-ef254d8a357f
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
 	github.com/asaskevich/govalidator v0.0.0-20180315120708-ccb8e960c48f
 	github.com/casbin/casbin v1.8.1
-	github.com/casbin/xorm-adapter v0.0.0-20181207150928-e40cbd17d53f
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/francoispqt/gojay v0.0.0-20190228132548-90d953358b68
 	github.com/go-chi/chi v4.0.2+incompatible
