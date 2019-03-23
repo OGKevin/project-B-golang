@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/casbin/xorm-adapter"
+	"github.com/OGKevin/xorm-adapter"
 )
 
 func init() {

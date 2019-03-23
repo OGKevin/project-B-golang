@@ -119,7 +119,7 @@ func (a *Adapter) open() {
 		} else if a.driverName == "sqlite3" {
 			engine, err = xorm.NewEngine(a.driverName, a.dataSourceName)
 		} else {
-			engine, err = xorm.NewEngine(a.driverName, a.dataSourceName)
+			engine, err = xorm.NewEngine(a.driverName, a.dataSourceName+"casbin")
 		}
 		if err != nil {
 			panic(err)
