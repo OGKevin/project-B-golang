@@ -23,6 +23,8 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/paulmach/go.geo v0.0.0-20180829195134-22b514266d33
+	github.com/paulmach/go.geojson v1.4.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/pressly/goose v2.4.5+incompatible
 	github.com/satori/go.uuid v1.2.0
