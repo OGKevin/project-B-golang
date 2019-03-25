@@ -18,6 +18,50 @@
     "host": "project-b.ogkevin.nl",
     "basePath": "/api/v1",
     "paths": {
+        "/coordinates": {
+            "post": {
+                "description": "Save coordinates",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "coordinates"
+                ],
+                "summary": "Save coordinates",
+                "operationId": "coordinates-create",
+                "parameters": [
+                    {
+                        "description": "The expected request body.",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/coordinates.createBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The response will include the id of the newly created user.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responses.Created"
+                        }
+                    },
+                    "400": {
+                        "description": "The error object will explain why the request failed.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responses.BadRequest"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "post": {
                 "description": "Register a new user",
@@ -26,6 +70,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "user"
                 ],
                 "summary": "Register a new user",
                 "operationId": "register-new-user",
@@ -67,6 +114,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "user"
                 ],
                 "summary": "logs a user in",
                 "operationId": "user-login",
@@ -114,6 +164,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "user"
+                ],
                 "summary": "gets user by id",
                 "operationId": "get-user",
                 "parameters": [
@@ -159,6 +212,17 @@
         }
     },
     "definitions": {
+        "coordinates.createBody": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "string"
+                }
+            }
+        },
         "responses.Ack": {
             "type": "object",
             "properties": {

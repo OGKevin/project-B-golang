@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  coordinates.createBody:
+    properties:
+      latitude:
+        type: string
+      longitude:
+        type: string
+    type: object
   responses.Ack:
     properties:
       ack:
@@ -88,6 +95,36 @@ info:
   title: Project b
   version: "1.0"
 paths:
+  /coordinates:
+    post:
+      consumes:
+      - application/json
+      description: Save coordinates
+      operationId: coordinates-create
+      parameters:
+      - description: The expected request body.
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/coordinates.createBody'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The response will include the id of the newly created user.
+          schema:
+            $ref: '#/definitions/responses.Created'
+            type: object
+        "400":
+          description: The error object will explain why the request failed.
+          schema:
+            $ref: '#/definitions/responses.BadRequest'
+            type: object
+      summary: Save coordinates
+      tags:
+      - coordinates
   /user:
     post:
       consumes:
@@ -117,6 +154,8 @@ paths:
             $ref: '#/definitions/responses.BadRequest'
             type: object
       summary: Register a new user
+      tags:
+      - user
   /user/{userId}:
     get:
       consumes:
@@ -155,6 +194,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: gets user by id
+      tags:
+      - user
   /user/login:
     post:
       consumes:
@@ -183,6 +224,8 @@ paths:
             $ref: '#/definitions/responses.BadRequest'
             type: object
       summary: logs a user in
+      tags:
+      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

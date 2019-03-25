@@ -1,18 +1,20 @@
 package coordinates
 
 import (
+	"github.com/OGKevin/project-B-golang/interal/user"
 	"github.com/casbin/casbin"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
-	"net/http"
 )
 
 func NewRouter(coordinates coordinates, ja *jwtauth.JWTAuth, e *casbin.Enforcer) *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(jwtauth.Verifier(ja))
+	r.Use(jwtauth.Authenticator)
+	r.Use(user.SetUserID)
+	//r.Use(acl.BuildPermissionCheckMiddleware(e))
 
-	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-	})
+	r.Post("/", create(coordinates, e))
 
 	return r
 }

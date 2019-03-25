@@ -38,6 +38,7 @@ func NewCreateUserRequest(user Users, e *casbin.Enforcer) *createUserRequest {
 // @Summary Register a new user
 // @Description Register a new user
 // @ID register-new-user
+// @Tags user
 // @Accept  json
 // @Produce  json
 // @Param body body user.userRequest true "The expected request body. Username must be length(5|255) and Password length(10|255)."
@@ -64,7 +65,7 @@ func (b *createUserRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	 ok := b.e.AddPolicy(u.ID.String(), fmt.Sprintf("*/user/%s", u.ID), fmt.Sprintf("(%s)|(%s)|(%s)", http.MethodGet, http.MethodPut, http.MethodDelete))
+	 ok := b.e.AddPolicy(u.ID.String(), fmt.Sprintf(".+/user/%s", u.ID), fmt.Sprintf("(%s)|(%s)|(%s)", http.MethodGet, http.MethodPut, http.MethodDelete))
 	 if !ok {
 	 	logrus.Error("could not add policy")
 	 }
@@ -102,6 +103,7 @@ func newGetUser(users Users) *getUser {
 // @Summary gets user by id
 // @Description gets user by id
 // @ID get-user
+// @Tags user
 // @Accept  json
 // @Produce  json
 // @Security ApiKeyAuth
@@ -153,6 +155,7 @@ type jwtToken struct {
 // @Summary logs a user in
 // @Description on success, you will get a JWT token to put in the auth header
 // @ID user-login
+// @Tags user
 // @Accept  json
 // @Produce  json
 // @Param body body user.userRequest true "The expected request body."
