@@ -5,6 +5,7 @@ import (
 	"github.com/paulmach/go.geo"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type Point struct {
@@ -19,7 +20,7 @@ func NewPoint(userID uuid.UUID, coordinates *geo.Point) *Point {
 
 type coordinates interface {
 	Create(point *Point) (uuid.UUID, error)
-	Get(ID uuid.UUID) (Point, error)
+	Get(ID uuid.UUID) (*Point, error)
 	ListByUserID(userID uuid.UUID) (chan Point, error)
 	Delete(ID uuid.UUID) error
 }
@@ -63,9 +64,37 @@ func (c *coordinatesFromDatabase) Get(ID uuid.UUID) (*Point, error) {
 }
 
 func (c *coordinatesFromDatabase) ListByUserID(userID uuid.UUID) (chan Point, error) {
-	panic("implement me")
+	rows, err := c.db.Query(`select id, point from coordinates where user_id = ?`, userID)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not fetch all coordinates by user")
+	}
+
+	defer rows.Close()
+
+	ch := make(chan Point)
+
+	go func() {
+		defer close(ch)
+		for rows.Next() {
+			var p Point
+			if err = rows.Scan(&p.ID, &p.Coordinates); err != nil {
+				logrus.WithError(err).Errorf("could not scan rows for coordinates into struct")
+				continue
+			}
+			p.UserID = userID
+
+			ch <- p
+		}
+	}()
+
+	return ch, nil
 }
 
 func (c *coordinatesFromDatabase) Delete(ID uuid.UUID) error {
-	panic("implement me")
+	_, err := c.db.Exec(`delete from coordinates where id = ?`, ID)
+	if err != nil {
+		return errors.Wrap(err, "could not delete coordinate")
+	}
+
+	return nil
 }
