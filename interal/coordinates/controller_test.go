@@ -3,20 +3,22 @@ package coordinates
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/OGKevin/project-B-golang/interal/acl"
-	"github.com/OGKevin/xorm-adapter"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/jwtauth"
-	"github.com/satori/go.uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/paulmach/go.geo"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/OGKevin/project-B-golang/interal/acl"
+	"github.com/OGKevin/xorm-adapter"
 	"github.com/casbin/casbin"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/jwtauth"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/satori/go.uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_create(t *testing.T) {
@@ -80,14 +82,19 @@ func Test_create(t *testing.T) {
 }
 
 type coordinatesForTest struct {
+	getNotFound bool
 }
 
 func (*coordinatesForTest) Create(point *Point) (uuid.UUID, error) {
 	return uuid.NewV4(), nil
 }
 
-func (*coordinatesForTest) Get(ID uuid.UUID) (*Point, error) {
-	panic("implement me")
+func (c *coordinatesForTest) Get(ID uuid.UUID) (*Point, error) {
+	if c.getNotFound  {
+		return nil, errors.New("not found")
+	}
+
+	return NewPoint(uuid.NewV4(), geo.NewPoint(10.000, 50.000)), nil
 }
 
 func (*coordinatesForTest) ListByUserID(userID uuid.UUID) (chan Point, error) {
@@ -107,4 +114,69 @@ func createRequestBody(t *testing.T) io.Reader {
 
 	return buf
 
+}
+
+func Test_get(t *testing.T) {
+	type args struct {
+		coordinates coordinates
+	}
+	tests := []struct {
+		name string
+		args args
+		response    http.ResponseWriter
+		request     *http.Request
+		code        int
+		disableEnforcer bool
+	}{
+		{
+			name: "get non existing",
+			args: args{
+				coordinates: &coordinatesForTest{getNotFound: true},
+			},
+			response: httptest.NewRecorder(),
+			request: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.NewV4()), nil),
+			code: http.StatusNotFound,
+			disableEnforcer: true,
+		},
+		{
+			name: "get existing",
+			args: args{
+				coordinates: &coordinatesForTest{},
+			},
+			response: httptest.NewRecorder(),
+			request: httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", uuid.NewV4()), nil),
+			code: http.StatusOK,
+			disableEnforcer: true,
+		},
+	}
+
+	ja := jwtauth.New("HS256", []byte("secret"), nil)
+	e := acl.NewEnforcer(xormadapter.NewAdapter("sqlite3", "file::memory:?mode=memory&cache=shared"))
+	e.EnableLog(true)
+	e.EnableAutoSave(true)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.disableEnforcer {
+				e.EnableEnforce(false)
+			}
+
+			r := NewRouter(tt.args.coordinates, ja, e)
+
+			token, _, err := ja.Encode(jwt.MapClaims{"user_id": uuid.NewV4()})
+			if !assert.NoError(t, err) {
+				return
+			}
+
+			tt.request.Header.Set("Authorization", fmt.Sprintf("BEARER %s", token.Raw))
+
+			r.ServeHTTP(tt.response, tt.request)
+
+			w := tt.response.(*httptest.ResponseRecorder)
+
+			if !assert.Equal(t, tt.code, w.Code) {
+				return
+			}
+		})
+	}
 }

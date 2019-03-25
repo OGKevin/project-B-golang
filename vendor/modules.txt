@@ -13,8 +13,8 @@ github.com/alecthomas/template/parse
 github.com/asaskevich/govalidator
 # github.com/casbin/casbin v1.8.1
 github.com/casbin/casbin
-github.com/casbin/casbin/model
 github.com/casbin/casbin/persist
+github.com/casbin/casbin/model
 github.com/casbin/casbin/effect
 github.com/casbin/casbin/log
 github.com/casbin/casbin/persist/file-adapter

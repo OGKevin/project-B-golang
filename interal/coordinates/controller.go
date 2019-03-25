@@ -6,6 +6,7 @@ import (
 	"github.com/OGKevin/project-B-golang/interal/responses"
 	"github.com/asaskevich/govalidator"
 	"github.com/casbin/casbin"
+	"github.com/go-chi/chi"
 	"github.com/paulmach/go.geo"
 	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ type createBody struct {
 // @Tags coordinates
 // @Accept  json
 // @Produce  json
+// @Param Authorization header string true "The BEARER token"
 // @Param body body coordinates.createBody true "The expected request body."
 // @Success 200 {object} responses.Created "The response will include the id of the newly created user."
 // @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
@@ -65,9 +67,35 @@ func create(coordinates coordinates, e *casbin.Enforcer) http.HandlerFunc {
 			return
 		}
 
-		e.AddPolicy(userID.String(), fmt.Sprintf("*/coordinates/%s", ID), fmt.Sprintf("(%s)|(%s)", http.MethodGet, http.MethodDelete))
-		e.AddPolicy(userID.String(), ".+/coordinates", fmt.Sprintf("(%s)", http.MethodGet))
+		e.AddPolicy(userID.String(), fmt.Sprintf(".+/coordinates/%s$", ID), fmt.Sprintf("(%s)|(%s)", http.MethodGet, http.MethodDelete))
+		e.AddPolicy(userID.String(), ".+/coordinates$", fmt.Sprintf("(%s)", http.MethodGet))
 
 		responses.WriteCreated(w, ID)
+	}
+}
+
+// get Get a specific coordinate
+// @Summary Get a specific coordinate
+// @Description Get a specific coordinate
+// @ID coordinates-get
+// @Tags coordinates
+// @Accept  json
+// @Produce  json
+// @Param id path string true "The id of the entity"
+// @Param Authorization header string true "The BEARER token"
+// @Success 200 {object} coordinates.Point "The response will include the id of the newly created user."
+// @Failure 400 {object} responses.BadRequest "The error object will explain why the request failed."
+// @Router /coordinates/{id} [get]
+func get(coordinates coordinates) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ID := chi.URLParam(r, "id")
+		p, err := coordinates.Get(uuid.FromStringOrNil(ID))
+		if err != nil {
+			logrus.WithError(err).Error("could not get coordinates by id")
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		_ = json.NewEncoder(w).Encode(p)
 	}
 }
