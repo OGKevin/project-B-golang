@@ -13,8 +13,8 @@ github.com/alecthomas/template/parse
 github.com/asaskevich/govalidator
 # github.com/casbin/casbin v1.8.1
 github.com/casbin/casbin
-github.com/casbin/casbin/persist
 github.com/casbin/casbin/model
+github.com/casbin/casbin/persist
 github.com/casbin/casbin/effect
 github.com/casbin/casbin/log
 github.com/casbin/casbin/persist/file-adapter
@@ -22,6 +22,8 @@ github.com/casbin/casbin/rbac
 github.com/casbin/casbin/rbac/default-role-manager
 github.com/casbin/casbin/util
 github.com/casbin/casbin/config
+# github.com/casbin/gorm-adapter v0.0.0-20190318080705-e74a050c51a4
+github.com/casbin/gorm-adapter
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -51,6 +53,10 @@ github.com/go-xorm/builder
 github.com/go-xorm/core
 # github.com/go-xorm/xorm v0.7.1
 github.com/go-xorm/xorm
+# github.com/jinzhu/gorm v1.9.2
+github.com/jinzhu/gorm
+# github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
+github.com/jinzhu/inflection
 # github.com/jmoiron/sqlx v1.2.0
 github.com/jmoiron/sqlx
 github.com/jmoiron/sqlx/reflectx

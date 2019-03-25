@@ -10,6 +10,7 @@ import (
 	"github.com/OGKevin/project-B-golang/interal/user"
 	"github.com/OGKevin/project-B-golang/interal/wellknown"
 	"github.com/asaskevich/govalidator"
+	"github.com/casbin/gorm-adapter"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/docgen"
@@ -22,7 +23,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/OGKevin/xorm-adapter"
 )
 
 func init() {
@@ -106,8 +106,10 @@ func createRouter(db *sqlx.DB) *chi.Mux{
 
 func apiRouter(db *sqlx.DB) chi.Router {
 	ja := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
-	e := acl.NewEnforcer(xormadapter.NewAdapter("mysql", os.Getenv("DB_PATH"), true))
+	e := acl.NewEnforcer(gormadapter.NewAdapter("mysql", os.Getenv("DB_PATH"), true))
 	e.EnableAutoSave(true)
+	e.EnableLog(true)
+	e.EnableEnforce(true)
 
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,9 @@ require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
 	github.com/asaskevich/govalidator v0.0.0-20180315120708-ccb8e960c48f
 	github.com/casbin/casbin v1.8.1
+	github.com/casbin/gorm-adapter v0.0.0-20190318080705-e74a050c51a4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/francoispqt/gojay v0.0.0-20190228132548-90d953358b68
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/docgen v1.0.5
@@ -18,6 +20,10 @@ require (
 	github.com/go-xorm/builder v0.3.4 // indirect
 	github.com/go-xorm/core v0.6.2 // indirect
 	github.com/go-xorm/xorm v0.7.1 // indirect
+	github.com/gofrs/uuid v3.2.0+incompatible // indirect
+	github.com/jinzhu/gorm v1.9.2 // indirect
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
+	github.com/jinzhu/now v1.0.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect

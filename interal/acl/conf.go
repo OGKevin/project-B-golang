@@ -11,5 +11,5 @@ p = sub, obj, act
 e = some(where (p.eft == allow))
 
 [matchers]
-m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
+m = r.sub == p.sub && regexMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 `
