@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  coordinates.Point:
+    properties:
+      coordinates:
+        type: string
+      id:
+        type: string
+      user_id:
+        type: string
+    type: object
   coordinates.createBody:
     properties:
       latitude:
@@ -102,6 +111,11 @@ paths:
       description: Save coordinates
       operationId: coordinates-create
       parameters:
+      - description: The BEARER token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: The expected request body.
         in: body
         name: body
@@ -123,6 +137,39 @@ paths:
             $ref: '#/definitions/responses.BadRequest'
             type: object
       summary: Save coordinates
+      tags:
+      - coordinates
+  /coordinates/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific coordinate
+      operationId: coordinates-get
+      parameters:
+      - description: The id of the entity
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The BEARER token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The response will include the id of the newly created user.
+          schema:
+            $ref: '#/definitions/coordinates.Point'
+            type: object
+        "400":
+          description: The error object will explain why the request failed.
+          schema:
+            $ref: '#/definitions/responses.BadRequest'
+            type: object
+      summary: Get a specific coordinate
       tags:
       - coordinates
   /user:

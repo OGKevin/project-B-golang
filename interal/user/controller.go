@@ -65,7 +65,7 @@ func (b *createUserRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	 ok := b.e.AddPolicy(u.ID.String(), fmt.Sprintf(".+/user/%s", u.ID), fmt.Sprintf("(%s)|(%s)|(%s)", http.MethodGet, http.MethodPut, http.MethodDelete))
+	 ok := b.e.AddPolicy(u.ID.String(), fmt.Sprintf(".+/user/%s$", u.ID), fmt.Sprintf("(%s)|(%s)|(%s)", http.MethodGet, http.MethodPut, http.MethodDelete))
 	 if !ok {
 	 	logrus.Error("could not add policy")
 	 }

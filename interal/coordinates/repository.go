@@ -9,9 +9,9 @@ import (
 )
 
 type Point struct {
-	ID          uuid.UUID
-	UserID      uuid.UUID
-	Coordinates *geo.Point
+	ID          uuid.UUID `json:"id"`
+	UserID      uuid.UUID `json:"user_id"`
+ 	Coordinates *geo.Point `json:"coordinates"`
 }
 
 func NewPoint(userID uuid.UUID, coordinates *geo.Point) *Point {
@@ -44,7 +44,7 @@ func (c *coordinatesFromDatabase) Create(point *Point) (uuid.UUID, error) {
 }
 
 func (c *coordinatesFromDatabase) Get(ID uuid.UUID) (*Point, error) {
-	rows, err := c.db.Query(`select user_id, point from coordinates where id := ? limit 1`, ID)
+	rows, err := c.db.Query(`select user_id, point from coordinates where id = ? limit 1`, ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get point by id")
 	}
